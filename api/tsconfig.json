@@ -1,0 +1,15 @@
+{    
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "lib": [ "es2015" ],
+
+        "paths": {
+            "#domain": ["./src/domain/index.ts"],
+            "#application": ["./src/application/index.ts"],
+            "#config": ["./src/domain/config/configuration.ts"]
+        }
+    }
+}

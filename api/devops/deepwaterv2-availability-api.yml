@@ -1,0 +1,176 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+    name: ${NAMESPACE}
+    labels:
+        app: ${PROJECT_NAME}
+        cloud: gcp
+        environment: ${YAML_ENVIRONMENT}
+        journey: interoperabilidade-azr
+        oi: '600002109'
+        product: deepwaterv2
+---
+kind: Secret
+apiVersion: v1
+data:
+    .dockerconfigjson: eyJhdXRocyI6eyJpbWFnZXNkYXNhLmF6dXJlY3IuaW8iOnsiYXV0aCI6ImFXMWhaMlZ6WkdGellUcEtlWHBxY1VKd1JqMXVTa0pUU1hCSldtbEtXbmMwY2xsMWNWVjFNemhqWXc9PSIsInBhc3N3b3JkIjoiSnl6anFCcEY9bkpCU0lwSVppSlp3NHJZdXFVdTM4Y2MiLCJ1c2VybmFtZSI6ImltYWdlc2Rhc2EifX19
+metadata:
+    name: imagesdasa
+    namespace: ${NAMESPACE}
+type: kubernetes.io/dockerconfigjson
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: ${PROJECT_NAME}
+    namespace: ${NAMESPACE}
+    labels:
+        app: ${PROJECT_NAME}
+        cloud: gcp
+        environment: ${YAML_ENVIRONMENT}
+        journey: interoperabilidade-azr
+        oi: '600002109'
+        product: deepwaterv2
+spec:
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: 0
+            maxSurge: 50%
+    replicas: ${YAML_REPLICAS}
+    selector:
+        matchLabels:
+            app: ${PROJECT_NAME}
+            cloud: gcp
+            environment: ${YAML_ENVIRONMENT}
+            journey: interoperabilidade-azr
+            oi: '600002109'
+            product: deepwaterv2
+    template:
+        metadata:
+            namespace: ${NAMESPACE}
+            labels:
+                app: ${PROJECT_NAME}
+                cloud: gcp
+                environment: ${YAML_ENVIRONMENT}
+                journey: interoperabilidade-azr
+                oi: '600002109'
+                product: deepwaterv2
+        spec:
+            imagePullSecrets:
+                - name: imagesdasa
+            containers:
+                - name: ${PROJECT_NAME}
+                  image: ${IMAGE_VERSION}
+                  ports:
+                      - containerPort: ${PORT}
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: ${PORT}
+                      initialDelaySeconds: 10
+                      periodSeconds: 30
+                      timeoutSeconds: 30
+                      successThreshold: 1
+                      failureThreshold: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: ${PORT}
+                      initialDelaySeconds: 5
+                      periodSeconds: 2
+                      timeoutSeconds: 5
+                      successThreshold: 1
+                      failureThreshold: 3
+                  resources:
+                      requests:
+                          memory: '256Mi'
+                          cpu: '0.3'
+                      limits:
+                          memory: '512Mi'
+                          cpu: '1'
+            tolerations:
+                - key: 'kubernetes.azure.com/scalesetpriority'
+                  operator: 'Equal'
+                  value: 'spot'
+                  effect: 'NoSchedule'
+---
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v1
+metadata:
+    name: ${PROJECT_NAME}
+    namespace: ${NAMESPACE}
+    labels:
+        app: ${PROJECT_NAME}
+        cloud: gcp
+        environment: ${YAML_ENVIRONMENT}
+        journey: interoperabilidade-azr
+        oi: '600002109'
+        product: deepwaterv2
+spec:
+    scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${PROJECT_NAME}
+    minReplicas: ${YAML_MIN_REPLICAS}
+    maxReplicas: ${YAML_MAX_REPLICAS}
+    targetCPUUtilizationPercentage: 150
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+    name: ${PROJECT_NAME}
+    namespace: ${NAMESPACE}
+    labels:
+        app: ${PROJECT_NAME}
+        cloud: gcp
+        environment: ${YAML_ENVIRONMENT}
+        journey: interoperabilidade-azr
+        oi: '600002109'
+        product: deepwaterv2
+spec:
+    selector:
+        app: ${PROJECT_NAME}
+        cloud: gcp
+        environment: ${YAML_ENVIRONMENT}
+        journey: interoperabilidade-azr
+        oi: '600002109'
+        product: deepwaterv2
+    ports:
+        - port: 80
+          targetPort: ${PORT}
+    type: ClusterIP
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+    name: ${PROJECT_NAME}-${YAML_ENVIRONMENT}-ingress
+    namespace: ${NAMESPACE}
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/backend-protocol: 'HTTP'
+        nginx.ingress.kubernetes.io/load-balance: ewma
+        nginx.ingress.kubernetes.io/proxy-read-timeout: '60'
+        nginx.ingress.kubernetes.io/proxy-send-timeout: '60'
+        nginx.ingress.kubernetes.io/proxy-body-size: '20m'
+        nginx.ingress.kubernetes.io/proxy-buffer-size: '8k'
+spec:
+    ingressClassName: nginx
+    tls:
+        - hosts:
+              - ${PROJECT_NAME}.${YAML_ENVIRONMENT}.k8s.dasaexp.io
+          secretName: ${YAML_ENVIRONMENT}-k8s-ingress-secret-tls
+    rules:
+        - host: ${PROJECT_NAME}.${YAML_ENVIRONMENT}.k8s.dasaexp.io
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: ${PROJECT_NAME}
+                            port:
+                                number: 80
