@@ -1,0 +1,205 @@
+def SetPath(nodejsversion) {
+    return sh (script: '. nvmuse ' + nodejsversion, returnStdout: true).trim()
+} 
+
+def pipelineConfig = [
+    deploy: [
+        develop: [
+            FORTIFY_ENVIRONMENT: 'develop',
+            ENVIRONMENT: 'development',
+            YAML_ENVIRONMENT: 'dev',
+            ACCOUNT_SERVICE: 'sa-cicd-pipelines-prj-deepwaterv2-dev',
+            KUBECONFIG: 'kubeconfig_cluster-deepwaterv2-dev',
+            SLACK_CHANNEL: 'deepwaterv2-notifications',
+            PROJECT_URL: 'deepwaterv2-availability-api.dev.k8s.dasaexp.io',
+            NAMESPACE: 'availability-api',
+            MONGO_CONNECTION_STRING: 'mongodb://pl-02-001-us-central1-gcp.mc5as.mongodb.net:27017,pl-02-034-us-central1-gcp.mc5as.mongodb.net:27017,pl-02-045-us-central1-gcp.mc5as.mongodb.net:27017/db-safe-deepwaterv2-dev?w=majority&replicaSet=atlas-lairv1-shard-0&authMechanism=MONGODB-X509&authSource=%24external&tls=true&tlsCertificateKeyFile=cert-app-deepwaterv2.pem',
+            CERTIFICATE_FILE: 'cert-app-deepwaterv2-dev-02',
+            YAML_REPLICAS: 1,
+            YAML_MIN_REPLICAS: 1,
+            YAML_MAX_REPLICAS: 10
+        ],
+        homolog: [
+            FORTIFY_ENVIRONMENT: 'homolog',
+            ENVIRONMENT: 'homolog',
+            YAML_ENVIRONMENT: 'hml',
+            ACCOUNT_SERVICE: 'sa-cicd-pipelines-prj-deepwaterv2-hml',
+            KUBECONFIG: 'kubeconfig_cluster-deepwaterv2-hml',
+            SLACK_CHANNEL: 'deepwaterv2-notifications',
+            PROJECT_URL: 'deepwaterv2-availability-api.hml.k8s.dasaexp.io',
+            NAMESPACE: 'availability-api',
+            MONGO_CONNECTION_STRING: 'mongodb://pl-02-001-us-central1-gcp.mc5as.mongodb.net:27017,pl-02-034-us-central1-gcp.mc5as.mongodb.net:27017,pl-02-045-us-central1-gcp.mc5as.mongodb.net:27017/db-safe-deepwaterv2-hml?w=majority&replicaSet=atlas-lairv1-shard-0&authMechanism=MONGODB-X509&authSource=%24external&tls=true&tlsCertificateKeyFile=cert-app-deepwaterv2.pem',
+            CERTIFICATE_FILE: 'cert-app-deepwaterv2-hml-02',
+            YAML_REPLICAS: 2,
+            YAML_MIN_REPLICAS: 2,
+            YAML_MAX_REPLICAS: 10
+        ],
+        master: [
+            FORTIFY_ENVIRONMENT: '1.0.0',
+            ENVIRONMENT: 'production',
+            YAML_ENVIRONMENT: 'prd',
+            ACCOUNT_SERVICE: 'sa-cicd-pipelines-prj-deepwaterv2-prd',
+            KUBECONFIG: 'kubeconfig_cluster-deepwaterv2-prd',
+            PROJECT_URL: 'deepwaterv2-availability-api.prd.k8s.dasaexp.io',
+            SLACK_CHANNEL: 'deepwaterv2-notifications',
+            NAMESPACE: 'availability-api',
+            CERTIFICATE_FILE: 'cert-app-deepwaterv2-prd-02',
+            MONGO_CONNECTION_STRING: '',
+            YAML_REPLICAS: 1,
+            YAML_MIN_REPLICAS: 1,
+            YAML_MAX_REPLICAS: 60
+        ]
+    ],
+]
+
+
+pipeline {
+  agent { node { label 'linux && nodejs' } }
+
+  environment {
+    PROJECT_NAME = 'deepwaterv2-availability-api'
+    VERSION = "1.0.0"
+    REVISION = "${env.BUILD_NUMBER}"
+    PATH = SetPath('v18')
+    TYPE_COMPILE_LANG = "npm"
+    SLACK_CHANNEL = "${pipelineConfig.deploy[env.GIT_BRANCH].SLACK_CHANNEL}"
+    NAMESPACE = "${pipelineConfig.deploy[env.GIT_BRANCH].NAMESPACE}"
+    ENVIRONMENT = "${pipelineConfig.deploy[env.GIT_BRANCH].ENVIRONMENT}"
+    PROJECT_URL = "${pipelineConfig.deploy[env.GIT_BRANCH].PROJECT_URL}"
+    YAML_ENVIRONMENT = "${pipelineConfig.deploy[env.GIT_BRANCH].YAML_ENVIRONMENT}"
+    MONGO_CONNECTION_STRING = "${pipelineConfig.deploy[env.GIT_BRANCH].MONGO_CONNECTION_STRING}"
+    CERTIFICATE_FILE = credentials("${pipelineConfig.deploy[env.GIT_BRANCH].CERTIFICATE_FILE}")
+    YAML_REPLICAS = "${pipelineConfig.deploy[env.GIT_BRANCH].YAML_REPLICAS}"
+    YAML_MIN_REPLICAS = "${pipelineConfig.deploy[env.GIT_BRANCH].YAML_MIN_REPLICAS}"
+    YAML_MAX_REPLICAS = "${pipelineConfig.deploy[env.GIT_BRANCH].YAML_MAX_REPLICAS}"
+    PORT = "3000"
+
+    GCP_SERVICE_ACCOUNT_KEY = credentials("${pipelineConfig.deploy[env.GIT_BRANCH].ACCOUNT_SERVICE}")
+    AZURE_APP_ID = credentials('azureAppId ')
+    AZURE_APP_PASS = credentials('azureAppPass ')
+    DOCKER_USER_LOGIN = credentials('DOCKER_USER_LOGIN ')
+    DOCKER_USER_PASS = credentials('DOCKER_USER_PASS ')
+    KUBECONFIG = credentials("${pipelineConfig.deploy[env.GIT_BRANCH].KUBECONFIG}")
+
+    SONAR_TOKEN = credentials('sonar_token')
+    SONAR_URL = credentials('sonar_url')
+    DASA_FORTIFY_TOKEN=credentials('dasa_fortify_token')
+    PRISMA_SECRET = credentials('PRISMA_SECRET')
+    PRISMA_KEY = credentials('PRISMA_KEY')
+    FORTIFY_CLIENT_TOKEN = credentials('FORTIFY_CLIENT_TOKEN')
+    NEXUS_IQ_TOKEN = credentials('NEXUS_IQ_TOKEN')
+
+    DASA_FORTIFY_ACCESSIBILITY = "internalnetwork"
+    DASA_FORTIFY_INTERFACES = "API"
+    DASA_FORTIFY_DATA = "dados_sensiveis_medicos"
+    DASA_FORTIFY_PRODUCT = "Resultado"
+    DASA_FORTIFY_DEV_PHASE = "New"
+    DASA_FORTIFY_URL = "http://${PROJECT_URL}"
+
+    DASA_FORTIFY_EXCLUSIONS = "node_modules,dist,devops,coverage,mock,scripts,test,jest.config.js,jest.e2e.config.js"
+    DASA_FORTIFY_VERSION = "${pipelineConfig.deploy[env.GIT_BRANCH].FORTIFY_ENVIRONMENT}"
+    IMAGE_VERSION_ENV = "${pipelineConfig.deploy[env.GIT_BRANCH].ENVIRONMENT}"
+
+    IMAGE_VERSION = "${DOCKER_REPOSITORY}/${IMAGE_VERSION_ENV}/${PROJECT_NAME}:${REVISION}"
+    K8_FILE = "./devops/${PROJECT_NAME}.yml"
+  }
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+  }
+
+  stages {
+    stage('Setup') {
+      steps {
+        sh '''
+          az login -u $AZURE_APP_ID -p $AZURE_APP_PASS --service-principal --tenant $AZURE_TENANT_ID
+          az acr login --name imagesdasa
+        '''
+        sh "cp -f \$GCP_SERVICE_ACCOUNT_KEY credentialGCP.json"
+        sh "cp -f \$CERTIFICATE_FILE cert-app-deepwaterv2.pem"
+      }
+    }
+
+     stage('Install Dependencies') {
+       steps {
+         sh 'npm ci'
+       }
+     }
+
+    
+    stage('Lint') {
+      steps {
+        sh 'npm run lint'
+      }
+    }
+    
+
+    stage('Tests') {
+      steps {
+        sh 'export YAML_ENVIRONMENT=$YAML_ENVIRONMENT && export MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING && export GOOGLE_APPLICATION_CREDENTIALS=credentialGCP.json && npm run coverage'
+      }
+    }
+    
+
+    
+    stage('Scan SonarQube') {
+      steps {
+        script {
+          withSonarQubeEnv('SonarQube') {
+            def projectName = env.GIT_BRANCH == 'master' ? env.PROJECT_NAME : "${env.PROJECT_NAME}-${env.ENVIRONMENT}"
+            env.SONAR_SCANNER_OPTS = "-Dsonar.projectKey=${projectName} -Dsonar.projectName=${projectName} -Dsonar.projectVersion=${env.VERSION}-${env.GIT_BRANCH}-${env.REVISION}"
+            sh 'npm run sonar'
+          }
+        }
+      }
+    }
+    
+
+    stage('Build docker image') {
+      steps {
+        sh '''
+            docker build -t $IMAGE_VERSION --build-arg NODE_ENV=$ENVIRONMENT --build-arg YAML_ENVIRONMENT=$YAML_ENVIRONMENT --build-arg PORT=$PORT --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING .
+            docker push $IMAGE_VERSION
+        '''
+      }
+    }
+
+    stage('Approved to PRD') {
+      when { branch 'master' }
+      options {
+        timeout(time: 600, unit: 'SECONDS')
+      }
+      steps {
+        input(
+          id: 'Proceed', message: 'Was this successful?', parameters: [
+            [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Package Approved to deploy in PRD ? (Click "Proceed" to continue)']
+        ])
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sh '''
+            sed 's|\${IMAGE_VERSION}|'"${IMAGE_VERSION}"'|g' -i $K8_FILE
+            sed 's|\${PROJECT_NAME}|'"${PROJECT_NAME}"'|g' -i $K8_FILE
+            sed 's|\${NAMESPACE}|'"${NAMESPACE}"'|g' -i $K8_FILE
+            sed 's|\${PROJECT_URL}|'"${PROJECT_URL}"'|g' -i $K8_FILE
+            sed 's|\${PORT}|'"${PORT}"'|g' -i $K8_FILE
+            sed 's|\${YAML_ENVIRONMENT}|'"${YAML_ENVIRONMENT}"'|g' -i $K8_FILE
+            sed 's|\${YAML_REPLICAS}|'"${YAML_REPLICAS}"'|g' -i $K8_FILE
+            sed 's|\${YAML_MIN_REPLICAS}|'"${YAML_MIN_REPLICAS}"'|g' -i $K8_FILE
+            sed 's|\${YAML_MAX_REPLICAS}|'"${YAML_MAX_REPLICAS}"'|g' -i $K8_FILE
+            kubectl apply --kubeconfig=$KUBECONFIG -f $K8_FILE --insecure-skip-tls-verify
+        '''
+      }
+    }
+  }
+  post {
+    success {
+      slackSend (color: '#BADA55', message: ":mario_luigi_dance: Deploy concluído - ${env.GIT_BRANCH} - ${env.BUILD_NUMBER} - ${DASA_FORTIFY_URL}", channel: env.SLACK_CHANNEL)
+    }
+    failure {
+      slackSend (color: '#FF0000', message: ":alert: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' falhou!", channel: env.SLACK_CHANNEL)
+    }
+  }
+}

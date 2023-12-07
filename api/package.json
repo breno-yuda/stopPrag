@@ -1,0 +1,63 @@
+{
+    "name": "stop-prag-docs",
+    "version": "0.0.1",
+    "private": true,
+    "license": "UNLICENSED",
+    "engines": {
+        "node": "^18",
+        "npm": ">=8",
+        "yarn": "please-use-npm"
+    },
+    "scripts": {
+        "debug": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/service/server.ts",
+        "prebuild": "rimraf dist",
+        "build": "tsc --project tsconfig.build.json",
+        "test": "vitest --test-timeout=50000",
+        "test:ui": "vitest --ui",
+        "coverage": "vitest run --coverage",
+        "lint": "eslint \"**/*.{ts,tsx}\"",
+        "lint:fix": "npm run lint -- --fix",
+        "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/service/server.ts",
+        "start:prod": "nodenv -f .env ./dist/service/server.js",
+        "start": "node ./dist/service/server.js",
+        "sonar": "sonar-scanner",
+        "prepare": "husky install"
+    },
+    "dependencies": {
+        "@fastify/swagger": "^8.10.0",
+        "@fastify/swagger-ui": "^1.9.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "fastify": "^4.24.3",
+        "fluent-json-schema": "^4.2.0-beta.0",
+        "mongoose": "^8.0.0",
+        "pino-pretty": "^10.2.0",
+        "qs": "^6.11.2",
+        "reflect-metadata": "^0.1.13",
+        "tsyringe": "^4.8.0",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.13",
+        "@types/qs": "^6.9.9",
+        "@types/supertest": "^2.0.12",
+        "@types/uuid": "^9.0.3",
+        "@typescript-eslint/eslint-plugin": "^6.13.2",
+        "@vitest/coverage-v8": "^0.34.6",
+        "@vitest/ui": "^0.34.6",
+        "auditjs": "^4.0.41",
+        "eslint": "^8.55.0",
+        "eslint-config-standard-with-typescript": "^40.0.0",
+        "eslint-plugin-import": "^2.29.0",
+        "eslint-plugin-n": "^16.3.1",
+        "eslint-plugin-promise": "^6.1.1",
+        "husky": "^8.0.0",
+        "light-my-request": "^5.10.0",
+        "rimraf": "^5.0.5",
+        "sonar-scanner": "^3.1.0",
+        "supertest": "^6.3.3",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.3.3",
+        "vitest": "^0.34.6"
+    }
+}
