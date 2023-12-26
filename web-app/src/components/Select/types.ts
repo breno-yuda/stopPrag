@@ -11,7 +11,7 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   containerClassName?: string;
   options: SelectOptions[];
-  errors: FieldErrors<BudgetFormData>;
+  errors?: FieldErrors<BudgetFormData>;
   name: keyof BudgetFormData;
 }
 

@@ -83,8 +83,7 @@ export const Budget = () => {
 
   const handleFinishInvoice = (data: BudgetFormData) => {
     console.log(data);
-    // reset();
-    // navigate('/repo');
+    reset();
   };
 
   const handleZipCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -447,7 +446,7 @@ export const Budget = () => {
 
           <div className='mt-6 flex items-center justify-between gap-x-6'>
             <Button
-              buttonStyle='link'
+              buttonStyle='secondary'
               type='button'
               onClick={() => reset()}
               text='Limpar'

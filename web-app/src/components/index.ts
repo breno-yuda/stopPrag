@@ -5,4 +5,5 @@ export * from './Textarea';
 export * from './DatePicker';
 export * from './Button';
 export * from './Footer';
-export * from './FileItem';
+export * from './Pagination';
+export * from './BudgetsTable';
