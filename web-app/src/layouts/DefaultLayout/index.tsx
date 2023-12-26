@@ -5,15 +5,16 @@ import { Footer, Header } from '../../components';
 export const DefaultLayout = () => {
   const location = useLocation();
 
-  const isHomeScreen = location.pathname !== '/';
+  const isHomeScreen =
+    location.pathname === '/' || location.pathname === '/not-found';
 
   return (
     <div className='flex min-h-screen flex-col'>
-      {isHomeScreen && <Header />}
+      {!isHomeScreen && <Header />}
 
       <Outlet />
 
-      {isHomeScreen && <Footer />}
+      {!isHomeScreen && <Footer />}
     </div>
   );
 };
