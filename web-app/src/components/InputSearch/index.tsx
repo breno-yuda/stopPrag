@@ -20,7 +20,7 @@ export const InputSearch = () => {
       <input
         type='text'
         id='table-search'
-        className='block w-80 rounded-lg border-0 border-gray-300 p-2 ps-10 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600'
+        className='block w-80 rounded-lg border-0 border-gray-300 p-2 ps-10 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600'
         placeholder='Procurar por...'
       />
     </div>
