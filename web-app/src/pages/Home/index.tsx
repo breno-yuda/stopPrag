@@ -1,57 +1,80 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { NavLink, useNavigate } from 'react-router-dom';
+import * as zod from 'zod';
+
+import logo from '../../assets/logo.jpg';
+import { Input } from '../../components';
+
+const loginFormValidationSchema = zod.object({
+  email: zod.string().min(1, 'O e-mail é obrigatório.'), // E-mail
+  password: zod.string().min(1, 'A senha é obrigatória.'), // Senha
+});
+
+export type LoginFormData = zod.infer<typeof loginFormValidationSchema>;
+
 export const Home = () => {
+  const navigate = useNavigate();
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginFormValidationSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const {
+    handleSubmit,
+    // reset,
+    register,
+    formState: { errors },
+  } = loginForm;
+
+  const handleFinishLogin = (data: LoginFormData) => {
+    navigate('/budget');
+    console.log(data);
+    // reset();
+  };
+
   return (
     <section>
       <div className='mx-auto flex h-screen flex-col items-center justify-center px-6 py-8 lg:py-0'>
-        {/* <NavLink href='#' className='mb-6 flex items-center'>
+        <NavLink to='#' className='mb-6 flex items-center'>
           <img
             className='h-10 w-auto'
-            src='/logo.jpg'
+            src={logo}
             alt='Stop Prag'
             width={387}
             height={99}
           />
-        </NavLink> */}
+        </NavLink>
 
-        <div className='w-full rounded-lg bg-white shadow-xl sm:max-w-md md:mt-0 xl:p-0'>
-          <div className='space-y-4 p-6 sm:p-8 md:space-y-6'>
-            <h1 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl'>
-              Faça login em sua conta
-            </h1>
-
-            <form className='space-y-4 md:space-y-6'>
-              <div>
-                <label
-                  htmlFor='email'
-                  className='mb-2 block text-sm font-medium text-gray-900'
-                >
-                  E-mail
-                </label>
-
-                <input
-                  type='email'
-                  name='email'
+        <div className='w-full rounded-lg border border-gray-50 bg-white shadow-md sm:max-w-md md:mt-0 xl:p-0'>
+          <div className='p-6 sm:p-8'>
+            <form
+              className='space-y-4'
+              onSubmit={handleSubmit(handleFinishLogin)}
+            >
+              <div className='grid grid-cols-1 gap-x-4 gap-y-2'>
+                <Input
+                  label='E-mail'
                   id='email'
-                  className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary-600 focus:ring-primary-600 sm:text-sm'
+                  type='email'
+                  errors={errors}
                   placeholder='you@example.com'
                   required
+                  {...register('email')}
                 />
-              </div>
 
-              <div>
-                <label
-                  htmlFor='password'
-                  className='mb-2 block text-sm font-medium text-gray-900'
-                >
-                  Senha
-                </label>
-
-                <input
-                  type='password'
-                  name='password'
+                <Input
+                  label='Senha'
                   id='password'
+                  type='password'
+                  errors={errors}
                   placeholder='••••••••'
-                  className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary-600 focus:ring-primary-600 sm:text-sm'
                   required
+                  {...register('password')}
                 />
               </div>
 
@@ -62,7 +85,7 @@ export const Home = () => {
                       id='remember'
                       aria-describedby='remember'
                       type='checkbox'
-                      className='focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-primary-300'
+                      className='focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 text-primary-600 focus:ring-primary-300'
                     />
                   </div>
 
