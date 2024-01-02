@@ -7,6 +7,7 @@ import * as zod from 'zod';
 
 import { Input, Select, Textarea, Button, DatePicker } from '../../components';
 import { federativeUnitsBrazil } from '../../constants';
+import { postDocsGenerate } from '../../services/docs/postDocsGenerate';
 
 const budgetFormValidationSchema = zod.object({
   address: zod.string().min(1, 'O endereço é obrigatório.'), // Logradouro -
@@ -82,8 +83,29 @@ export const Budget = () => {
   } = budgetForm;
 
   const handleFinishInvoice = (data: BudgetFormData) => {
-    console.log(data);
-    reset();
+    try {
+      console.log(data);
+
+      postDocsGenerate({
+        bairroCliente: data.neighborhood,
+        cargoCliente: '',
+        cidadeCliente: data.city,
+        comportamento: data.pestBehavior,
+        condicoesPagamento: data.budgetPaymentMethod,
+        custo: data.budgetCoast,
+        enderecoCliente: data.address,
+        estadoCliente: data.federativeUnit,
+        idProposta: data.budgetNumber,
+        metodo: data.method,
+        municipioCliente: data.city,
+        nomeCliente: data.name,
+        visualizacaoHumana: data.humanVisualization,
+      });
+
+      reset();
+    } catch (error) {
+      toast.error('Não foi possível criar o documento.');
+    }
   };
 
   const handleZipCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
