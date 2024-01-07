@@ -4,11 +4,19 @@ import { type FastifyReply, type FastifyRequest } from 'fastify'
 import { DetailResponse } from '../domain/models/details/response'
 import { DetailRequest } from '../domain/models/details/request'
 import { MongoDB } from '../infrastructure/database/mongo-db-atlas'
+import IRequestBody from '../domain/interfaces/common/request'
+import PDFGenerator from '../infrastructure/PDF/pdf-create'
 // import { IDetailsResponse } from '../domain/interfaces/details/response/response'
 
-async function handler (request: FastifyRequest, response: FastifyReply) {
-  // const parsedBody = request.params as IDetailsRequest
-
+async function handler(request: FastifyRequest, response: FastifyReply) {
+  const parsedBody = request.body as IRequestBody
+  const sampleData = {
+    name: 'John Doe',
+    age: 30,
+    // Add more data properties as needed
+  }
+  const pdfGenerator = new PDFGenerator(parsedBody, 'output.pdf')
+  pdfGenerator.template1(parsedBody)
   // const mongo = new MongoDB()
 
   // try {
@@ -34,7 +42,7 @@ async function handler (request: FastifyRequest, response: FastifyReply) {
 
   //     return response.code(400).send(parsedError.message)
   // }
-  return await response.code(200).send('RotaDocs')
+  return await response.code(200).send(parsedBody)
 }
 
 export { handler }
