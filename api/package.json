@@ -20,12 +20,12 @@
         "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/service/server.ts",
         "start:prod": "nodenv -f .env ./dist/service/server.js",
         "start": "node ./dist/service/server.js",
-        "sonar": "sonar-scanner",
-        "prepare": "husky install"
+        "sonar": "sonar-scanner"
     },
     "dependencies": {
         "@fastify/swagger": "^8.10.0",
         "@fastify/swagger-ui": "^1.9.3",
+        "aws-sdk": "^2.1531.0",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "fastify": "^4.24.3",
@@ -55,7 +55,6 @@
         "eslint-plugin-import": "^2.29.0",
         "eslint-plugin-n": "^16.3.1",
         "eslint-plugin-promise": "^6.1.1",
-        "husky": "^8.0.0",
         "light-my-request": "^5.10.0",
         "rimraf": "^5.0.5",
         "sonar-scanner": "^3.1.0",
