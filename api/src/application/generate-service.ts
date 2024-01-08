@@ -6,17 +6,15 @@ import { DetailRequest } from '../domain/models/details/request'
 import { MongoDB } from '../infrastructure/database/mongo-db-atlas'
 import IRequestBody from '../domain/interfaces/common/request'
 import PDFGenerator from '../infrastructure/PDF/pdf-create'
+import { uploadToS3 } from '../infrastructure/AWS/s3/upload'
 // import { IDetailsResponse } from '../domain/interfaces/details/response/response'
 
 async function handler(request: FastifyRequest, response: FastifyReply) {
   const parsedBody = request.body as IRequestBody
-  const sampleData = {
-    name: 'John Doe',
-    age: 30,
-    // Add more data properties as needed
-  }
-  const pdfGenerator = new PDFGenerator(parsedBody, 'output.pdf')
-  pdfGenerator.template1(parsedBody)
+  const template = request.headers['template'] as string
+  const pdfGenerator = new PDFGenerator('output.pdf')
+  pdfGenerator.templateChooser(template, parsedBody)
+
   // const mongo = new MongoDB()
 
   // try {
