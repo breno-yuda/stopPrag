@@ -1,17 +1,11 @@
 import { type FastifyReply, type FastifyRequest } from 'fastify'
 
-// import { IDetailsRequest } from '../domain/interfaces/details/request/request'
-import { DetailResponse } from '../domain/models/details/response'
-import { DetailRequest } from '../domain/models/details/request'
-import { MongoDB } from '../infrastructure/database/mongo-db-atlas'
 import IRequestBody from '../domain/interfaces/common/request'
 import PDFGenerator from '../infrastructure/PDF/pdf-create'
-import { uploadToS3 } from '../infrastructure/AWS/s3/upload'
-// import { IDetailsResponse } from '../domain/interfaces/details/response/response'
 
 async function handler(request: FastifyRequest, response: FastifyReply) {
   const parsedBody = request.body as IRequestBody
-  const template = request.headers['template'] as string
+  const template = request.headers['template-number'] as string
   const pdfGenerator = new PDFGenerator('output.pdf')
   pdfGenerator.templateChooser(template, parsedBody)
 

@@ -1,12 +1,10 @@
 import { type FastifyReply, type FastifyRequest } from 'fastify'
 
 // import { IDetailsRequest } from '../domain/interfaces/details/request/request'
-import { DetailResponse } from '../domain/models/details/response'
-import { DetailRequest } from '../domain/models/details/request'
-import { MongoDB } from '../infrastructure/database/mongo-db-atlas'
+
 // import { IDetailsResponse } from '../domain/interfaces/details/response/response'
 
-async function handler (request: FastifyRequest, response: FastifyReply) {
+async function handler(request: FastifyRequest, response: FastifyReply) {
   // const parsedBody = request.params as IDetailsRequest
 
   // const mongo = new MongoDB()
