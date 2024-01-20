@@ -1,8 +1,7 @@
 import fs, { WriteStream } from 'fs'
 import PDFDocument from 'pdfkit'
 import IRequestBody from '../../domain/interfaces/common/request'
-import { uploadToS3
- } from '../AWS/s3/upload'
+import { uploadToS3 } from '../AWS/s3/upload'
 
 class PDFGenerator {
   private readonly document: PDFKit.PDFDocument
@@ -92,28 +91,32 @@ class PDFGenerator {
     }
   }
 
-  public async templateChooser(template: string ,data: IRequestBody) {
-    switch (template){
-    case '1':
-      for (let i = 0; i < 10; i++) {
-        this.addPage(i, data)
-        console.log(i)
-      }
-      this.document.pipe(this.source)
-      this.document.end()
-      const fileName = `generated_pdf_${Date.now()}.pdf`;
+  public async templateChooser(template: string, data: IRequestBody) {
+    const fileName = `generated_pdf_${Date.now()}.pdf`
 
-      await uploadToS3(this.document, fileName);
+    switch (template) {
+      case '1':
+        for (let i = 0; i < 10; i++) {
+          this.addPage(i, data)
+          console.log(i)
+        }
+        this.document.pipe(this.source)
+        this.document.end()
+        await uploadToS3(this.document, fileName)
+          .then(() => {
+            fs.unlinkSync(this.outputPath)
+          })
+          .catch((error) => {
+            console.log(error)
+          })
 
-
-      break;
+        break
     }
-    
   }
 
   private addHeader() {
     const headerImage =
-      '/home/brenoleega/yuda/stopPrag/api/src/domain/images/cabecalho.jpg'
+      '/Users/brenocarlopiccolipinto/yuda/software_development/stopPrag/stopPrag/api/src/domain/images/cabecalho.jpg'
     this.document.moveUp(2)
     this.document.image(headerImage, {
       fit: [450, 100],
@@ -125,7 +128,7 @@ class PDFGenerator {
   }
 
   private addFooter(name: string) {
-    const headerImage = `/home/brenoleega/yuda/stopPrag/api/src/domain/images/${name}.jpg`
+    const headerImage = `/Users/brenocarlopiccolipinto/yuda/software_development/stopPrag/stopPrag/api/src/domain/images/${name}.jpg`
 
     this.document.moveDown(2)
     this.document.image(headerImage, {
@@ -136,7 +139,7 @@ class PDFGenerator {
   }
 
   private image(name: string, x: number, y: number) {
-    const headerImage = `/home/brenoleega/yuda/stopPrag/api/src/domain/images/${name}.jpg`
+    const headerImage = `/Users/brenocarlopiccolipinto/yuda/software_development/stopPrag/stopPrag/api/src/domain/images/${name}.jpg`
     this.document.image(headerImage, {
       fit: [x, y],
       align: 'center',

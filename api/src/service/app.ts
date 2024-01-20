@@ -10,7 +10,7 @@ import authenticate from './routes/v1/authenticate'
 import editDocs from './routes/v1/editdocs'
 
 export default class App {
-  public startup (fastify: FastifyInstance) {
+  public startup(fastify: FastifyInstance) {
     // Register @fastify/swagger plugin.
     fastify
       .register(fastifySwagger, swaggerOptions)
