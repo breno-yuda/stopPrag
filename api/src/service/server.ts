@@ -6,15 +6,15 @@ import * as qs from 'qs'
 
 import App from './app'
 
-function server () {
+function server() {
   const fastify: FastifyInstance = Fastify({
     ajv: {
       customOptions: {
-        keywords: ['collectionFormat']
-      }
+        keywords: ['collectionFormat'],
+      },
     },
     querystringParser: (str) => qs.parse(str),
-    logger: true
+    logger: true,
   })
 
   const app = container.resolve(App)
@@ -31,7 +31,7 @@ function server () {
 
       fastify.swagger()
       fastify.log.info(address)
-    }
+    },
   )
 }
 
