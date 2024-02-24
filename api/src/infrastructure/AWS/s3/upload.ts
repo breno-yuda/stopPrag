@@ -1,4 +1,5 @@
 import * as AWS from 'aws-sdk'
+import { generateExpirableUrl } from './download'
 
 async function uploadToS3(document: PDFKit.PDFDocument, fileName: string) {
   console.log('aqui entrou')
@@ -21,6 +22,7 @@ async function uploadToS3(document: PDFKit.PDFDocument, fileName: string) {
     .promise()
     .then(() => {
       console.log(`s3 uploadded`)
+      // return generateExpirableUrl('sa-east-1', params.Bucket, params.Key)
     })
     .catch((error) => {
       console.log(error)
